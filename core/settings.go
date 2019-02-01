@@ -38,7 +38,9 @@ func (s *settings) initConfig(configPath string, configStruct interface{}) (err 
 	}
 	config.Set("env", serverEnv)
 	s.config = config
-	err = config.Unmarshal(configStruct)
+	if configStruct != nil {
+		err = config.Unmarshal(configStruct)
+	}
 	return
 }
 

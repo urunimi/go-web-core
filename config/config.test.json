@@ -1,0 +1,12 @@
+{
+  "name": "Test",
+  "version": "1.0",
+  "server": {
+    "port": 8080
+  },
+  "logger": {
+    "level": "debug",
+    "formatter": "json",
+    "file": "test.log"
+  }
+}

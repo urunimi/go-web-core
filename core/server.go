@@ -1,11 +1,13 @@
 package core
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/labstack/echo"
@@ -13,13 +15,13 @@ import (
 
 // Server provides methods for controlling application lifecycle
 type Server interface {
-	Init(configPath string, config interface{})
+	Init(configPath string, config interface{}) error
 	Start()
 	Exit(sig os.Signal)
 }
 
 type App interface {
-	Init()
+	Init() error
 	RegisterRoute(driver *Engine)
 	Clean() error
 }
@@ -41,13 +43,15 @@ type server struct {
 	httpServer *http.Server
 }
 
-func (s *server) Init(configPath string, configStruct interface{}) {
+func (s *server) Init(configPath string, configStruct interface{}) error {
 	s.initSettings(configPath, configStruct)
 	s.initLoggers()
 	for _, svc := range s.services {
-		svc.Init()
+		if err := svc.Init(); err != nil {
+			return err
+		}
 	}
-	return
+	return nil
 }
 
 func (s *server) initSettings(configPath string, configStruct interface{}) {
@@ -89,14 +93,22 @@ func (s *server) Start() {
 		svc.RegisterRoute(s.driver)
 	}
 	s.registerExitHandler()
-	if err := s.httpServer.ListenAndServe(); err != nil {
-		panic(err)
-	}
+	_ = s.httpServer.ListenAndServe()
 }
 
 func (s *server) Exit(sig os.Signal) {
 	for _, svc := range s.services {
 		_ = svc.Clean()
+	}
+	// Shutdown http server
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := s.httpServer.Shutdown(ctx); err != nil {
+		Logger.Fatal("Server Shutdown Error:", err)
+	}
+	// Exit
+	if sig != nil {
+		os.Exit(2) // SIGINT
 	}
 }
 
