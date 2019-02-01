@@ -2,7 +2,9 @@ package core_test
 
 import (
 	"os"
+	"sync"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -36,27 +38,26 @@ func (sts *ServerTestSuite) TestServer_Init() {
 	a.Equal(sts.app.inited, true)
 }
 
-//func (sts *ServerTestSuite) TestServer_Start_Exit() {
-//	a := assert.Assertions{}
-//	_ = sts.server.Init("../config/", nil)
-//	var wg sync.WaitGroup
-//	wg.Add(2)
-//	go func(server core.Server) {
-//		server.Start()
-//		wg.Done()
-//	}(sts.server)
-//	go func(server core.Server) {
-//		for sts.app.registered == false {
-//			time.Sleep(time.Millisecond)
-//		}
-//		a.Equal(true, sts.app.registered)
-//		server.Exit(nil)
-//		a.Equal(true, sts.app.cleaned)
-//		wg.Done()
-//	}(sts.server)
-//	wg.Wait()
-//	a.Equal(true, sts.app.cleaned)
-//}
+func (sts *ServerTestSuite) TestServer_Start_Exit() {
+	a := assert.Assertions{}
+	_ = sts.server.Init("../config/", nil)
+	var wg sync.WaitGroup
+	wg.Add(2)
+	go func(sts *ServerTestSuite) {
+		sts.server.Start()
+		wg.Done()
+	}(sts)
+	go func(sts *ServerTestSuite) {
+		for sts.app.registered == false {
+			time.Sleep(time.Millisecond)
+		}
+		a.Equal(true, sts.app.registered)
+		sts.server.Exit(nil)
+		wg.Done()
+	}(sts)
+	wg.Wait()
+	a.Equal(true, sts.app.cleaned)
+}
 
 type TestApp struct {
 	inited, registered, cleaned bool
