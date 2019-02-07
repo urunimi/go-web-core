@@ -5,7 +5,7 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/getsentry/raven-go"
-	"github.com/urunimi/go-web-core/plugin/sentry"
+	pluginLogrus "github.com/urunimi/go-web-core/plugin/logrus"
 )
 
 //Gets application logger
@@ -27,7 +27,7 @@ func getLogger(newLogger bool) *logrus.Logger {
 }
 
 func registerSentryHook(log *logrus.Logger, client *raven.Client) {
-	hook := sentry.NewSentryHook(client, []logrus.Level{
+	hook := pluginLogrus.NewSentryHook(client, []logrus.Level{
 		logrus.PanicLevel,
 		logrus.FatalLevel,
 		logrus.ErrorLevel,
