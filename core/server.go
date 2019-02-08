@@ -11,6 +11,8 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
+	pluginEcho "github.com/urunimi/go-web-core/plugin/echo"
 )
 
 // Server provides methods for controlling application lifecycle
@@ -46,12 +48,20 @@ type server struct {
 func (s *server) Init(configPath string, configStruct interface{}) error {
 	s.initSettings(configPath, configStruct)
 	s.initLoggers()
+	s.initReporters()
 	for _, svc := range s.services {
 		if err := svc.Init(); err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+func (s *server) initReporters() {
+	if s.settings.sentry != nil {
+		registerSentryHook(Logger, s.settings.sentry)
+		pluginEcho.SetErrorHandlerForSentry(s.driver, s.settings.sentry)
+	}
 }
 
 func (s *server) initSettings(configPath string, configStruct interface{}) {
@@ -67,9 +77,6 @@ func (s *server) initLoggers() {
 		Logger = getLogger(false)
 		config := config.GetStringMapString("logger")
 		initLogger(Logger, config) // default logger
-		if s.settings.sentry != nil {
-			registerSentryHook(Logger, s.settings.sentry)
-		}
 	}
 	if config.IsSet("loggers") {
 		// Multiple loggers
@@ -89,6 +96,10 @@ func (s *server) Start() {
 		Addr:    fmt.Sprintf(":%d", config.GetInt("server.port")),
 		Handler: s.driver,
 	}
+
+	s.driver.Use(middleware.Recover())
+	s.driver.Use(middleware.CORS())
+
 	for _, svc := range s.services {
 		svc.RegisterRoute(s.driver)
 	}
