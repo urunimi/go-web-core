@@ -8,7 +8,7 @@ import (
 	pluginLogrus "github.com/urunimi/go-web-core/plugin/logrus"
 )
 
-//Gets application logger
+//Gets application _logger
 func getLogger(newLogger bool) *logrus.Logger {
 	formatter := &logrus.TextFormatter{
 		FullTimestamp:   true,
@@ -35,7 +35,7 @@ func registerSentryHook(log *logrus.Logger, client *raven.Client) {
 	log.Hooks.Add(hook)
 }
 
-// Customize logger from config
+// Customize _logger from config
 func initLogger(log *logrus.Logger, config map[string]string) {
 	if config["level"] != "" {
 		lvl, err := logrus.ParseLevel(config["level"])

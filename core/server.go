@@ -29,9 +29,9 @@ type App interface {
 }
 
 var (
-	Logger *logrus.Logger
-	// Loggers contains applications loggers
-	Loggers = map[string]*logrus.Logger{}
+	_logger *logrus.Logger
+	// loggers contains applications loggers
+	_loggers = map[string]*logrus.Logger{}
 )
 
 type Context = echo.Context
@@ -43,6 +43,13 @@ type server struct {
 	settings   *settings
 	driver     *Engine
 	httpServer *http.Server
+}
+
+func Logger() *logrus.Logger {
+	if _logger == nil {
+		_logger = logrus.StandardLogger()
+	}
+	return _logger
 }
 
 func (s *server) Init(configPath string, configStruct interface{}) error {
@@ -59,7 +66,7 @@ func (s *server) Init(configPath string, configStruct interface{}) error {
 
 func (s *server) initReporters() {
 	if s.settings.sentry != nil {
-		registerSentryHook(Logger, s.settings.sentry)
+		registerSentryHook(_logger, s.settings.sentry)
 		pluginEcho.SetErrorHandlerForSentry(s.driver, s.settings.sentry)
 	}
 }
@@ -73,18 +80,18 @@ func (s *server) initSettings(configPath string, configStruct interface{}) {
 
 func (s *server) initLoggers() {
 	config := s.settings.config
-	if config.IsSet("logger") {
-		Logger = getLogger(false)
-		config := config.GetStringMapString("logger")
-		initLogger(Logger, config) // default logger
+	if config.IsSet("_logger") {
+		_logger = getLogger(false)
+		config := config.GetStringMapString("_logger")
+		initLogger(_logger, config) // default _logger
 	}
-	if config.IsSet("loggers") {
-		// Multiple loggers
-		loggers := config.GetStringMap("loggers")
+	if config.IsSet("_loggers") {
+		// Multiple _loggers
+		loggers := config.GetStringMap("_loggers")
 		for k := range loggers {
-			config := config.GetStringMapString("loggers." + k)
-			Loggers[k] = getLogger(true)
-			initLogger(Loggers[k], config)
+			config := config.GetStringMapString("_loggers." + k)
+			_loggers[k] = getLogger(true)
+			initLogger(_loggers[k], config)
 		}
 	}
 }
@@ -115,7 +122,7 @@ func (s *server) Exit(sig os.Signal) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := s.httpServer.Shutdown(ctx); err != nil {
-		Logger.Fatal("Server Shutdown Error:", err)
+		_logger.Fatal("Server Shutdown Error:", err)
 	}
 	// Exit
 	if sig != nil {
