@@ -52,6 +52,10 @@ func Logger() *logrus.Logger {
 	return _logger
 }
 
+func NewEngine() *Engine {
+	return echo.New()
+}
+
 func (s *server) Init(configPath string, configStruct interface{}) error {
 	s.initSettings(configPath, configStruct)
 	s.initLoggers()
