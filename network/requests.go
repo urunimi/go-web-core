@@ -36,7 +36,8 @@ func (req *Request) newHttpRequest() (*http.Request, error) {
 	var httpRequest *http.Request = nil
 	switch req.Method {
 	case http.MethodGet:
-		httpRequest, err = http.NewRequest(req.Method, req.Url+"?"+encodedParams, nil)
+		httpRequest, err = http.NewRequest(req.Method, req.Url, nil)
+		httpRequest.URL.RawQuery = req.Params.Encode()
 		if req.Header != nil {
 			httpRequest.Header = *req.Header
 		}
