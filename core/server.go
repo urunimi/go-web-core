@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/Sirupsen/logrus"
+	"github.com/go-playground/validator"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	pluginEcho "github.com/urunimi/go-web-core/plugin/echo"
@@ -45,6 +46,10 @@ type server struct {
 	httpServer *http.Server
 }
 
+type reqValidator struct {
+	validator *validator.Validate
+}
+
 func Logger() *logrus.Logger {
 	if _logger == nil {
 		_logger = logrus.StandardLogger()
@@ -56,7 +61,12 @@ func NewEngine() *Engine {
 	return echo.New()
 }
 
+func (cv *reqValidator) Validate(i interface{}) error {
+	return cv.validator.Struct(i)
+}
+
 func (s *server) Init(configPath string, configStruct interface{}) error {
+	s.driver.Validator = &reqValidator{validator: validator.New()}
 	s.initSettings(configPath, configStruct)
 	s.initLoggers()
 	s.initReporters()
@@ -147,7 +157,7 @@ func (s *server) registerExitHandler() {
 func NewServer(services ...App) Server {
 	server := &server{
 		services: services,
-		driver:   echo.New(),
+		driver:   NewEngine(),
 	}
 	return Server(server)
 }
