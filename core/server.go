@@ -78,13 +78,6 @@ func (s *server) Init(configPath string, configStruct interface{}) error {
 	return nil
 }
 
-func (s *server) initReporters() {
-	if s.settings.sentry != nil {
-		registerSentryHook(_logger, s.settings.sentry)
-		pluginEcho.SetErrorHandlerForSentry(s.driver, s.settings.sentry)
-	}
-}
-
 func (s *server) initSettings(configPath string, configStruct interface{}) {
 	s.settings = &settings{}
 	if err := s.settings.init(configPath, configStruct); err != nil {
@@ -94,19 +87,26 @@ func (s *server) initSettings(configPath string, configStruct interface{}) {
 
 func (s *server) initLoggers() {
 	config := s.settings.config
-	if config.IsSet("_logger") {
+	if config.IsSet("logger") {
 		_logger = getLogger(false)
-		config := config.GetStringMapString("_logger")
+		config := config.GetStringMapString("logger")
 		initLogger(_logger, config) // default _logger
 	}
-	if config.IsSet("_loggers") {
+	if config.IsSet("loggers") {
 		// Multiple _loggers
-		loggers := config.GetStringMap("_loggers")
+		loggers := config.GetStringMap("loggers")
 		for k := range loggers {
-			config := config.GetStringMapString("_loggers." + k)
+			config := config.GetStringMapString("loggers." + k)
 			_loggers[k] = getLogger(true)
 			initLogger(_loggers[k], config)
 		}
+	}
+}
+
+func (s *server) initReporters() {
+	if s.settings.sentry != nil {
+		registerSentryHook(_logger, s.settings.sentry)
+		pluginEcho.SetErrorHandlerForSentry(s.driver, s.settings.sentry)
 	}
 }
 
