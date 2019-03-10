@@ -58,7 +58,9 @@ func Logger() *logrus.Logger {
 }
 
 func NewEngine() *Engine {
-	return echo.New()
+	e := echo.New()
+	e.Validator = &reqValidator{validator: validator.New()}
+	return e
 }
 
 func (cv *reqValidator) Validate(i interface{}) error {
@@ -66,7 +68,6 @@ func (cv *reqValidator) Validate(i interface{}) error {
 }
 
 func (s *server) Init(configPath string, configStruct interface{}) error {
-	s.driver.Validator = &reqValidator{validator: validator.New()}
 	s.initSettings(configPath, configStruct)
 	s.initLoggers()
 	s.initReporters()
