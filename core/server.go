@@ -39,6 +39,8 @@ type Context = echo.Context
 
 type Engine = echo.Echo
 
+type HTTPError = echo.HTTPError
+
 type server struct {
 	services   []App
 	settings   *settings
