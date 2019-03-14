@@ -16,13 +16,14 @@ import (
 	pluginEcho "github.com/urunimi/go-web-core/plugin/echo"
 )
 
-// Server provides methods for controlling application lifecycle
+// Server provides methods for controlling server's lifecycle
 type Server interface {
 	Init(configPath string, config interface{}) error
 	Start()
 	Exit(sig os.Signal)
 }
 
+// App provides methods for controlling an app's lifecycle
 type App interface {
 	Init() error
 	RegisterRoute(driver *Engine)
@@ -35,10 +36,13 @@ var (
 	_loggers = map[string]*logrus.Logger{}
 )
 
+//Context is echo context
 type Context = echo.Context
 
+// Engine define http engine
 type Engine = echo.Echo
 
+// HTTPError define http error
 type HTTPError = echo.HTTPError
 
 type server struct {
@@ -52,6 +56,7 @@ type reqValidator struct {
 	validator *validator.Validate
 }
 
+// Logger return logger
 func Logger() *logrus.Logger {
 	if _logger == nil {
 		_logger = logrus.StandardLogger()
@@ -59,6 +64,7 @@ func Logger() *logrus.Logger {
 	return _logger
 }
 
+// NewEngine give new http engine
 func NewEngine() *Engine {
 	e := echo.New()
 	e.Validator = &reqValidator{validator: validator.New()}
@@ -93,7 +99,7 @@ func (s *server) initLoggers() {
 	if config.IsSet("logger") {
 		_logger = getLogger(false)
 		config := config.GetStringMapString("logger")
-		initLogger(_logger, config) // default _logger
+		initLogger(_logger, config)
 	}
 	if config.IsSet("loggers") {
 		// Multiple _loggers
@@ -157,6 +163,7 @@ func (s *server) registerExitHandler() {
 	}()
 }
 
+// NewServer return new server instance
 func NewServer(services ...App) Server {
 	server := &server{
 		services: services,
