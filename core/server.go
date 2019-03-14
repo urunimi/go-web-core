@@ -115,7 +115,7 @@ func (s *server) initLoggers() {
 func (s *server) initReporters() {
 	if s.settings.sentry != nil {
 		registerSentryHook(_logger, s.settings.sentry)
-		pluginEcho.SetErrorHandlerForSentry(s.driver, s.settings.sentry)
+		pluginEcho.SetErrorHandlerForSentry(s.driver, s.settings.sentry, _logger)
 	}
 }
 

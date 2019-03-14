@@ -1,18 +1,20 @@
 package echo
 
 import (
+	"github.com/Sirupsen/logrus"
 	"github.com/getsentry/raven-go"
 	"github.com/labstack/echo"
 )
 
-func SetErrorHandlerForSentry(e *echo.Echo, c *raven.Client) {
-	chh := SentryHTTPErrorHandler{e, c}
+func SetErrorHandlerForSentry(e *echo.Echo, c *raven.Client, l *logrus.Logger) {
+	chh := SentryHTTPErrorHandler{e, c, l}
 	e.HTTPErrorHandler = chh.handleError
 }
 
 type SentryHTTPErrorHandler struct {
 	echo   *echo.Echo
 	client *raven.Client
+	logger *logrus.Logger
 }
 
 func (h *SentryHTTPErrorHandler) handleError(err error, c echo.Context) {
@@ -20,7 +22,7 @@ func (h *SentryHTTPErrorHandler) handleError(err error, c echo.Context) {
 	flags := map[string]string{
 		"endpoint": c.Request().RequestURI,
 	}
-	rvalMsg := &raven.Message{Message: err.Error(), Params: []interface{}{err}}
+	msg := &raven.Message{Message: err.Error(), Params: []interface{}{err}}
 	rvHttp := raven.NewHttp(c.Request())
 	if len(c.Request().PostForm) > 0 {
 		params := make(map[string]string)
@@ -29,5 +31,6 @@ func (h *SentryHTTPErrorHandler) handleError(err error, c echo.Context) {
 		}
 		rvHttp.Data = params
 	}
-	h.client.CaptureError(err, flags, rvalMsg, rvHttp)
+	h.logger.Warn("%v\n%v\nerr: %s", c.Request().URL, rvHttp.Data, err.Error())
+	h.client.CaptureError(err, flags, msg, rvHttp)
 }
