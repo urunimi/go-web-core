@@ -56,7 +56,7 @@ type defaultErrorListener struct {
 }
 
 func (del *defaultErrorListener) OnError(err error, c Context) {
-	stack := make([]byte, 1<<8)
+	stack := make([]byte, 4<<10)
 	runtime.Stack(stack, false)
 	Logger().Warnf("error: %s\n%s", err.Error(), stack)
 	del.engine.DefaultHTTPErrorHandler(err, c)
