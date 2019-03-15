@@ -68,7 +68,10 @@ func Logger() *logrus.Logger {
 // NewEngine give new http engine
 func NewEngine() *Engine {
 	e := echo.New()
-	e.Use(middleware.Recover())
+	e.Use(middleware.RecoverWithConfig(middleware.RecoverConfig{
+		StackSize:         16 << 10, // 16 KB
+		DisablePrintStack: false,
+	}))
 	e.Use(middleware.CORS())
 	e.Validator = &reqValidator{validator: validator.New()}
 	return e
