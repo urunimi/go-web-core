@@ -1,23 +1,19 @@
 package echo
 
 import (
-	"github.com/Sirupsen/logrus"
 	"github.com/getsentry/raven-go"
 	"github.com/labstack/echo"
 )
 
-func NewSentryErrorHandler(e *echo.Echo, c *raven.Client, l *logrus.Logger) *SentryHTTPErrorHandler {
-	return &SentryHTTPErrorHandler{e, c, l}
+func NewSentryErrorHandler(c *raven.Client) *SentryHTTPErrorHandler {
+	return &SentryHTTPErrorHandler{c}
 }
 
 type SentryHTTPErrorHandler struct {
-	echo   *echo.Echo
 	client *raven.Client
-	logger *logrus.Logger
 }
 
 func (h *SentryHTTPErrorHandler) OnError(err error, c echo.Context) {
-	h.echo.DefaultHTTPErrorHandler(err, c)
 	flags := map[string]string{
 		"endpoint": c.Request().RequestURI,
 	}
