@@ -32,7 +32,3 @@ func (h *SentryHTTPErrorHandler) OnError(err error, c echo.Context) {
 	}
 	h.client.CaptureError(err, flags, msg, rvHttp)
 }
-
-func (h *SentryHTTPErrorHandler) handleError(err error, c echo.Context) {
-
-}
