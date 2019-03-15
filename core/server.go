@@ -46,11 +46,24 @@ type Engine = echo.Echo
 // HTTPError define http error
 type HTTPError = echo.HTTPError
 
+type ErrorListener interface {
+	OnError(err error, c Context)
+}
+
+type defaultErrorListener struct {
+	engine *Engine
+}
+
+func (del *defaultErrorListener) OnError(err error, c Context) {
+	del.engine.DefaultHTTPErrorHandler(err, c)
+}
+
 type server struct {
-	services   []App
-	settings   *settings
-	driver     *Engine
-	httpServer *http.Server
+	services       []App
+	settings       *settings
+	driver         *Engine
+	httpServer     *http.Server
+	errorListeners []ErrorListener
 }
 
 type reqValidator struct {
@@ -68,10 +81,7 @@ func Logger() *logrus.Logger {
 // NewEngine give new http engine
 func NewEngine() *Engine {
 	e := echo.New()
-	e.Use(middleware.RecoverWithConfig(middleware.RecoverConfig{
-		StackSize:         16 << 10, // 16 KB
-		DisablePrintStack: false,
-	}))
+	e.Use(middleware.Recover())
 	e.Use(middleware.CORS())
 	e.Validator = &reqValidator{validator: validator.New()}
 	return e
@@ -82,6 +92,7 @@ func (cv *reqValidator) Validate(i interface{}) error {
 }
 
 func (s *server) Init(configPath string, configStruct interface{}) error {
+	s.initErrorHandlers()
 	s.initSettings(configPath, configStruct)
 	s.initLoggers()
 	s.initReporters()
@@ -122,7 +133,7 @@ func (s *server) initLoggers() {
 func (s *server) initReporters() {
 	if s.settings.sentry != nil {
 		registerSentryHook(_logger, s.settings.sentry)
-		pluginEcho.SetErrorHandlerForSentry(s.driver, s.settings.sentry, _logger)
+		s.errorListeners = append(s.errorListeners, pluginEcho.NewSentryErrorHandler(s.driver, s.settings.sentry, _logger))
 	}
 }
 
@@ -165,6 +176,17 @@ func (s *server) registerExitHandler() {
 		sig := <-sigs
 		s.Exit(sig)
 	}()
+}
+
+func (s *server) initErrorHandlers() {
+	s.errorListeners = []ErrorListener{
+		&defaultErrorListener{s.driver},
+	}
+	s.driver.HTTPErrorHandler = func(e error, i echo.Context) {
+		for _, el := range s.errorListeners {
+			el.OnError(e, i)
+		}
+	}
 }
 
 // NewServer return new server instance

@@ -6,9 +6,8 @@ import (
 	"github.com/labstack/echo"
 )
 
-func SetErrorHandlerForSentry(e *echo.Echo, c *raven.Client, l *logrus.Logger) {
-	chh := SentryHTTPErrorHandler{e, c, l}
-	e.HTTPErrorHandler = chh.handleError
+func NewSentryErrorHandler(e *echo.Echo, c *raven.Client, l *logrus.Logger) *SentryHTTPErrorHandler {
+	return &SentryHTTPErrorHandler{e, c, l}
 }
 
 type SentryHTTPErrorHandler struct {
@@ -17,7 +16,7 @@ type SentryHTTPErrorHandler struct {
 	logger *logrus.Logger
 }
 
-func (h *SentryHTTPErrorHandler) handleError(err error, c echo.Context) {
+func (h *SentryHTTPErrorHandler) OnError(err error, c echo.Context) {
 	h.echo.DefaultHTTPErrorHandler(err, c)
 	flags := map[string]string{
 		"endpoint": c.Request().RequestURI,
@@ -33,4 +32,8 @@ func (h *SentryHTTPErrorHandler) handleError(err error, c echo.Context) {
 	}
 	//h.logger.Warn("%v\n%v\nerr: %s", c.Request().URL, rvHttp.Data, err.Error())
 	h.client.CaptureError(err, flags, msg, rvHttp)
+}
+
+func (h *SentryHTTPErrorHandler) handleError(err error, c echo.Context) {
+
 }
