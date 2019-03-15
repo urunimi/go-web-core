@@ -103,6 +103,7 @@ func (s *server) initLoggers() {
 		_logger = getLogger(false)
 		config := config.GetStringMapString("logger")
 		initLogger(_logger, config)
+		s.driver.Logger = pluginEcho.Logger{Logger: _logger}
 	}
 	if config.IsSet("loggers") {
 		// Multiple _loggers
