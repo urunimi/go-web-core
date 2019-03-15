@@ -46,11 +46,25 @@ type Engine = echo.Echo
 // HTTPError define http error
 type HTTPError = echo.HTTPError
 
+type ErrorListener interface {
+	OnError(err error, c Context)
+}
+
+type defaultErrorListener struct {
+	engine *Engine
+}
+
+func (del *defaultErrorListener) OnError(err error, c Context) {
+	Logger().Warnf("error: %s", err.Error())
+	del.engine.DefaultHTTPErrorHandler(err, c)
+}
+
 type server struct {
-	services   []App
-	settings   *settings
-	driver     *Engine
-	httpServer *http.Server
+	services       []App
+	settings       *settings
+	driver         *Engine
+	httpServer     *http.Server
+	errorListeners []ErrorListener
 }
 
 type reqValidator struct {
@@ -79,6 +93,7 @@ func (cv *reqValidator) Validate(i interface{}) error {
 }
 
 func (s *server) Init(configPath string, configStruct interface{}) error {
+	s.initErrorHandlers()
 	s.initSettings(configPath, configStruct)
 	s.initLoggers()
 	s.initReporters()
@@ -119,7 +134,7 @@ func (s *server) initLoggers() {
 func (s *server) initReporters() {
 	if s.settings.sentry != nil {
 		registerSentryHook(_logger, s.settings.sentry)
-		pluginEcho.SetErrorHandlerForSentry(s.driver, s.settings.sentry, _logger)
+		s.errorListeners = append(s.errorListeners, pluginEcho.NewSentryErrorHandler(s.settings.sentry))
 	}
 }
 
@@ -162,6 +177,17 @@ func (s *server) registerExitHandler() {
 		sig := <-sigs
 		s.Exit(sig)
 	}()
+}
+
+func (s *server) initErrorHandlers() {
+	s.errorListeners = []ErrorListener{
+		&defaultErrorListener{s.driver},
+	}
+	s.driver.HTTPErrorHandler = func(e error, i echo.Context) {
+		for _, el := range s.errorListeners {
+			el.OnError(e, i)
+		}
+	}
 }
 
 // NewServer return new server instance
