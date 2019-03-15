@@ -30,7 +30,6 @@ func (h *SentryHTTPErrorHandler) OnError(err error, c echo.Context) {
 		}
 		rvHttp.Data = params
 	}
-	//h.logger.Warn("%v\n%v\nerr: %s", c.Request().URL, rvHttp.Data, err.Error())
 	h.client.CaptureError(err, flags, msg, rvHttp)
 }
 

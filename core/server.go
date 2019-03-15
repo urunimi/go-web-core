@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"runtime"
 	"syscall"
 	"time"
 
@@ -56,9 +55,7 @@ type defaultErrorListener struct {
 }
 
 func (del *defaultErrorListener) OnError(err error, c Context) {
-	stack := make([]byte, 4<<10)
-	runtime.Stack(stack, false)
-	Logger().Warnf("error: %s\n%s", err.Error(), stack)
+	Logger().Warnf("error: %s", err.Error())
 	del.engine.DefaultHTTPErrorHandler(err, c)
 }
 
