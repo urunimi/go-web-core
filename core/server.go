@@ -9,10 +9,11 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/labstack/echo/middleware"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/go-playground/validator"
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
 	pluginEcho "github.com/urunimi/go-web-core/plugin/echo"
 )
 
@@ -67,6 +68,8 @@ func Logger() *logrus.Logger {
 // NewEngine give new http engine
 func NewEngine() *Engine {
 	e := echo.New()
+	e.Use(middleware.Recover())
+	e.Use(middleware.CORS())
 	e.Validator = &reqValidator{validator: validator.New()}
 	return e
 }
@@ -126,9 +129,6 @@ func (s *server) Start() {
 		Addr:    fmt.Sprintf(":%d", config.GetInt("server.port")),
 		Handler: s.driver,
 	}
-
-	s.driver.Use(middleware.Recover())
-	s.driver.Use(middleware.CORS())
 
 	for _, svc := range s.services {
 		svc.RegisterRoute(s.driver)
