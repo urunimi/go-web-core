@@ -3,6 +3,7 @@ package echo
 import (
 	"github.com/getsentry/raven-go"
 	"github.com/labstack/echo"
+	"net"
 )
 
 func NewSentryErrorHandler(c *raven.Client) *SentryHTTPErrorHandler {
@@ -14,6 +15,14 @@ type SentryHTTPErrorHandler struct {
 }
 
 func (h *SentryHTTPErrorHandler) OnError(err error, c echo.Context) {
+	if _, ok := err.(*echo.HTTPError); ok {
+		return
+	}
+
+	if _, ok := err.(*net.OpError); ok {
+		return
+	}
+
 	flags := map[string]string{
 		"endpoint": c.Request().RequestURI,
 	}
