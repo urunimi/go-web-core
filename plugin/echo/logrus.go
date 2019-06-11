@@ -3,8 +3,8 @@ package echo
 import (
 	"io"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/labstack/gommon/log"
+	"github.com/sirupsen/logrus"
 )
 
 type Logger struct {

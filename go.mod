@@ -1,9 +1,8 @@
-module "https://github.com/urunimi/go-web-core"
+module github.com/urunimi/go-web-core
 
 go 1.12
 
 require (
-	github.com/Sirupsen/logrus v1.0.6
 	github.com/certifi/gocertifi v0.0.0-20180118203423-deb3ae2ef261
 	github.com/davecgh/go-spew v1.1.1
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
@@ -24,13 +23,13 @@ require (
 	github.com/pelletier/go-toml v1.2.0
 	github.com/pkg/errors v0.8.1
 	github.com/pmezard/go-difflib v1.0.0
+	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/afero v1.2.0
 	github.com/spf13/cast v1.3.0
 	github.com/spf13/jwalterweatherman v1.0.0
 	github.com/spf13/pflag v1.0.3
 	github.com/spf13/viper v1.3.1
 	github.com/stretchr/testify v1.3.0
-	github.com/urunimi/go-web-core v0.0.0-20190603061741-a352d3bc3467
 	github.com/valyala/bytebufferpool v1.0.0
 	github.com/valyala/fasttemplate v0.0.0-20170224212429-dcecefd839c4
 	golang.org/x/crypto v0.0.0-20190123085648-057139ce5d2b
@@ -42,8 +41,6 @@ require (
 	gopkg.in/yaml.v2 v2.2.2
 )
 
-exclude github.com/sirupsen/logrus v1.4.2
-
-exclude github.com/sirupsen/logrus v1.4.1
-
-exclude github.com/sirupsen/logrus v1.4.0
+// exclude github.com/sirupsen/logrus v1.4.2
+// exclude github.com/sirupsen/logrus v1.4.1
+// exclude github.com/sirupsen/logrus v1.4.0

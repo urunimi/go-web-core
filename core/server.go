@@ -11,7 +11,7 @@ import (
 
 	"github.com/labstack/echo/middleware"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"github.com/go-playground/validator"
 	"github.com/labstack/echo"
 	pluginEcho "github.com/urunimi/go-web-core/plugin/echo"
