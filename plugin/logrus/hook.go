@@ -3,7 +3,7 @@ package logrus
 import (
 	"errors"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"github.com/getsentry/raven-go"
 )
 
