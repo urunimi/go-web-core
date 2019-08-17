@@ -1,4 +1,4 @@
-package network
+package rest
 
 type Response struct {
 	Code    int         `json:"code"`
