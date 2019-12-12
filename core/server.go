@@ -108,13 +108,13 @@ func (s *server) Init() error {
 
 func (s *server) initLogger() {
 	_logger = getLogger(false)
-	if logLevel := os.Getenv("log_level"); logLevel != "" {
+	if logLevel := os.Getenv("LOG_LEVEL"); logLevel != "" {
 		lvl, err := logrus.ParseLevel(logLevel)
 		if err == nil {
 			_logger.SetLevel(lvl)
 		}
 	}
-	if logFormat := os.Getenv("log_format"); logFormat == "text" {
+	if logFormat := os.Getenv("LOG_FORMAT"); logFormat == "text" {
 		_logger.Formatter = &logrus.TextFormatter{
 			ForceColors:     true,
 			FullTimestamp:   true,
@@ -127,7 +127,7 @@ func (s *server) initLogger() {
 }
 
 func (s *server) initReporters() error {
-	if dsn := os.Getenv("sentry_dsn"); dsn != "" {
+	if dsn := os.Getenv("SENTRY_DSN"); dsn != "" {
 		if err := raven.SetDSN(dsn); err != nil {
 			return err
 		}
@@ -140,7 +140,7 @@ func (s *server) initReporters() error {
 
 func (s *server) Start() {
 	port := 8080
-	if portStr := os.Getenv("port"); portStr != "" {
+	if portStr := os.Getenv("PORT"); portStr != "" {
 		port, _ = strconv.Atoi(portStr)
 	}
 
