@@ -3,8 +3,8 @@ package core
 import (
 	"os"
 
-	"github.com/sirupsen/logrus"
 	"github.com/getsentry/raven-go"
+	"github.com/sirupsen/logrus"
 	pluginLogrus "github.com/urunimi/gorest/plugin/logrus"
 )
 
@@ -43,20 +43,5 @@ func initLogger(log *logrus.Logger, config map[string]string) {
 			log.SetLevel(lvl)
 		}
 	}
-	if config["file"] != "" {
-		file, err := os.OpenFile(config["file"], os.O_APPEND|os.O_CREATE|os.O_RDWR, 0644)
-		if err != nil {
-			panic("Failed to open log file" + config["File"])
-		}
-		log.Out = file
-	}
-	if config["formatter"] == "text" {
-		log.Formatter = &logrus.TextFormatter{
-			ForceColors:     true,
-			FullTimestamp:   true,
-			TimestampFormat: "2006-01-02 03:04:05",
-		}
-	} else if config["color"] == "true" {
-		log.Formatter = &logrus.JSONFormatter{}
-	}
+
 }
