@@ -10,8 +10,8 @@ type settings struct {
 	sentry *raven.Client
 }
 
-func (s *settings) init(configPath string, configStruct interface{}) (err error) {
-	if err = s.initConfig(configPath, configStruct); err != nil {
+func (s *settings) init() (err error) {
+	if err = s.initConfig(); err != nil {
 		return
 	}
 	if err = s.initSentry(); err != nil {
@@ -20,35 +20,20 @@ func (s *settings) init(configPath string, configStruct interface{}) (err error)
 	return
 }
 
-func (s *settings) initConfig(configPath string, configStruct interface{}) (err error) {
+func (s *settings) initConfig() (err error) {
 	config := viper.New()
 	defaultEnv := "local"
-	config.SetDefault("SERVER_ENV", defaultEnv)
+	config.SetDefault("server_env", defaultEnv)
 	config.AutomaticEnv()
-	if configPath != "" {
-		config.AddConfigPath(configPath)
-	} else {
-		config.AddConfigPath("./config/")
-	}
-	serverEnv := config.GetString("SERVER_ENV")
-	config.SetConfigName("config." + serverEnv)
-	err = config.ReadInConfig()
-	if err != nil {
-		return
-	}
-	config.Set("env", serverEnv)
 	s.config = config
-	if configStruct != nil {
-		err = config.Unmarshal(configStruct)
-	}
 	return
 }
 
 func (s *settings) initSentry() (err error) {
-	if !s.config.IsSet("Sentry") {
+	if !s.config.IsSet("sentry_dsn") {
 		return
 	}
-	err = raven.SetDSN(s.config.GetString("Sentry.Dsn"))
+	err = raven.SetDSN(s.config.GetString("sentry_dsn"))
 	s.sentry = raven.DefaultClient
 	return
 }

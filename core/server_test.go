@@ -22,7 +22,7 @@ func TestNewServerSuite(t *testing.T) {
 }
 
 func (sts *ServerTestSuite) SetupTest() {
-	_ = os.Setenv("SERVER_ENV", "test")
+	_ = os.Setenv("server_env", "test")
 	sts.app = &TestApp{}
 	sts.server = core.NewServer(sts.app)
 }
@@ -34,13 +34,13 @@ func (sts *ServerTestSuite) TestServer_NewServer() {
 
 func (sts *ServerTestSuite) TestServer_Init() {
 	a := assert.Assertions{}
-	_ = sts.server.Init("../config/", nil)
+	_ = sts.server.Init()
 	a.Equal(sts.app.inited, true)
 }
 
 func (sts *ServerTestSuite) TestServer_Start_Exit() {
 	a := assert.Assertions{}
-	_ = sts.server.Init("../config/", nil)
+	_ = sts.server.Init()
 	var wg sync.WaitGroup
 	wg.Add(2)
 	go func(sts *ServerTestSuite) {

@@ -11,15 +11,15 @@ import (
 
 	"github.com/labstack/echo/middleware"
 
-	"github.com/sirupsen/logrus"
 	"github.com/go-playground/validator"
 	"github.com/labstack/echo"
+	"github.com/sirupsen/logrus"
 	pluginEcho "github.com/urunimi/go-web-core/plugin/echo"
 )
 
 // Server provides methods for controlling server's lifecycle
 type Server interface {
-	Init(configPath string, config interface{}) error
+	Init() error
 	Start()
 	Exit(sig os.Signal)
 }
@@ -92,9 +92,11 @@ func (cv *reqValidator) Validate(i interface{}) error {
 	return cv.validator.Struct(i)
 }
 
-func (s *server) Init(configPath string, configStruct interface{}) error {
+func (s *server) Init() error {
 	s.initErrorHandlers()
-	s.initSettings(configPath, configStruct)
+	if err := s.initSettings(); err != nil {
+		return err
+	}
 	s.initLoggers()
 	s.initReporters()
 	for _, svc := range s.services {
@@ -105,11 +107,9 @@ func (s *server) Init(configPath string, configStruct interface{}) error {
 	return nil
 }
 
-func (s *server) initSettings(configPath string, configStruct interface{}) {
+func (s *server) initSettings() error {
 	s.settings = &settings{}
-	if err := s.settings.init(configPath, configStruct); err != nil {
-		panic(err)
-	}
+	return s.settings.init()
 }
 
 func (s *server) initLoggers() {
@@ -140,9 +140,9 @@ func (s *server) initReporters() {
 
 func (s *server) Start() {
 	config := s.settings.config
-	config.SetDefault("server.port", 8080)
+	config.SetDefault("port", 8080)
 	s.httpServer = &http.Server{
-		Addr:    fmt.Sprintf(":%d", config.GetInt("server.port")),
+		Addr:    fmt.Sprintf(":%d", config.GetInt("port")),
 		Handler: s.driver,
 	}
 
