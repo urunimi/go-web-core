@@ -6,20 +6,22 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 	"time"
 
+	"github.com/getsentry/raven-go"
 	"github.com/labstack/echo/middleware"
 
-	"github.com/sirupsen/logrus"
 	"github.com/go-playground/validator"
 	"github.com/labstack/echo"
-	pluginEcho "github.com/urunimi/go-web-core/plugin/echo"
+	"github.com/sirupsen/logrus"
+	pluginEcho "github.com/urunimi/gorest/plugin/echo"
 )
 
 // Server provides methods for controlling server's lifecycle
 type Server interface {
-	Init(configPath string, config interface{}) error
+	Init() error
 	Start()
 	Exit(sig os.Signal)
 }
@@ -61,7 +63,7 @@ func (del *defaultErrorListener) OnError(err error, c Context) {
 
 type server struct {
 	services       []App
-	settings       *settings
+	sentry         *raven.Client
 	driver         *Engine
 	httpServer     *http.Server
 	errorListeners []ErrorListener
@@ -92,10 +94,9 @@ func (cv *reqValidator) Validate(i interface{}) error {
 	return cv.validator.Struct(i)
 }
 
-func (s *server) Init(configPath string, configStruct interface{}) error {
+func (s *server) Init() error {
 	s.initErrorHandlers()
-	s.initSettings(configPath, configStruct)
-	s.initLoggers()
+	s.initLogger()
 	s.initReporters()
 	for _, svc := range s.services {
 		if err := svc.Init(); err != nil {
@@ -105,44 +106,46 @@ func (s *server) Init(configPath string, configStruct interface{}) error {
 	return nil
 }
 
-func (s *server) initSettings(configPath string, configStruct interface{}) {
-	s.settings = &settings{}
-	if err := s.settings.init(configPath, configStruct); err != nil {
-		panic(err)
-	}
-}
-
-func (s *server) initLoggers() {
-	config := s.settings.config
-	if config.IsSet("logger") {
-		_logger = getLogger(false)
-		config := config.GetStringMapString("logger")
-		initLogger(_logger, config)
-		s.driver.Logger = pluginEcho.Logger{Logger: _logger}
-	}
-	if config.IsSet("loggers") {
-		// Multiple _loggers
-		loggers := config.GetStringMap("loggers")
-		for k := range loggers {
-			config := config.GetStringMapString("loggers." + k)
-			_loggers[k] = getLogger(true)
-			initLogger(_loggers[k], config)
+func (s *server) initLogger() {
+	_logger = getLogger(false)
+	if logLevel := os.Getenv("LOG_LEVEL"); logLevel != "" {
+		lvl, err := logrus.ParseLevel(logLevel)
+		if err == nil {
+			_logger.SetLevel(lvl)
 		}
 	}
+	if logFormat := os.Getenv("LOG_FORMAT"); logFormat == "text" {
+		_logger.Formatter = &logrus.TextFormatter{
+			ForceColors:     true,
+			FullTimestamp:   true,
+			TimestampFormat: "2006-01-02 03:04:05",
+		}
+	} else {
+		_logger.Formatter = &logrus.JSONFormatter{}
+	}
+	s.driver.Logger = pluginEcho.Logger{Logger: _logger}
 }
 
-func (s *server) initReporters() {
-	if s.settings.sentry != nil {
-		registerSentryHook(_logger, s.settings.sentry)
-		s.errorListeners = append(s.errorListeners, pluginEcho.NewSentryErrorHandler(s.settings.sentry))
+func (s *server) initReporters() error {
+	if dsn := os.Getenv("SENTRY_DSN"); dsn != "" {
+		if err := raven.SetDSN(dsn); err != nil {
+			return err
+		}
+		s.sentry = raven.DefaultClient
+		registerSentryHook(_logger, s.sentry)
+		s.errorListeners = append(s.errorListeners, pluginEcho.NewSentryErrorHandler(s.sentry))
 	}
+	return nil
 }
 
 func (s *server) Start() {
-	config := s.settings.config
-	config.SetDefault("server.port", 8080)
+	port := 8080
+	if portStr := os.Getenv("PORT"); portStr != "" {
+		port, _ = strconv.Atoi(portStr)
+	}
+
 	s.httpServer = &http.Server{
-		Addr:    fmt.Sprintf(":%d", config.GetInt("server.port")),
+		Addr:    fmt.Sprintf(":%d", port),
 		Handler: s.driver,
 	}
 

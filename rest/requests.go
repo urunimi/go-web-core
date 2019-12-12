@@ -10,12 +10,12 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/urunimi/go-web-core/core"
+	"github.com/urunimi/gorest/core"
 )
 
 type Request struct {
 	Method  string
-	Url     string
+	URL     string
 	Params  *url.Values
 	Header  *http.Header
 	Timeout time.Duration
@@ -36,7 +36,7 @@ func (req *Request) newHttpRequest() (*http.Request, error) {
 	var httpRequest *http.Request = nil
 	switch req.Method {
 	case http.MethodGet:
-		httpRequest, err = http.NewRequest(req.Method, req.Url, nil)
+		httpRequest, err = http.NewRequest(req.Method, req.URL, nil)
 		httpRequest.URL.RawQuery = encodedParams
 		if req.Header != nil {
 			httpRequest.Header = *req.Header
@@ -46,7 +46,7 @@ func (req *Request) newHttpRequest() (*http.Request, error) {
 	case http.MethodDelete:
 		fallthrough
 	case http.MethodPut:
-		httpRequest, err = http.NewRequest(req.Method, req.Url, bytes.NewBufferString(encodedParams))
+		httpRequest, err = http.NewRequest(req.Method, req.URL, bytes.NewBufferString(encodedParams))
 		if req.Header != nil {
 			httpRequest.Header = *req.Header
 		}

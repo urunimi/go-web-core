@@ -61,8 +61,8 @@ github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXf
 github.com/stretchr/testify v1.3.0 h1:TivCn/peBQ7UY8ooIcPgZFpTNSz0Q2U6UrFlUfqbe0Q=
 github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
 github.com/ugorji/go/codec v0.0.0-20181204163529-d75b2dcb6bc8/go.mod h1:VFNgLljTbGfSG7qAOspJ7OScBnGdDN/yBr0sguwnwf0=
-github.com/urunimi/go-web-core v0.0.0-20190603061741-a352d3bc3467 h1:SXW7oGw1d/X72k/99nMC3UMvfZUipRVBufr/H69O6ao=
-github.com/urunimi/go-web-core v0.0.0-20190603061741-a352d3bc3467/go.mod h1:XzP1e0JAbHJE6xXsQXxHH17l2TvfC120F7j0qOUxIg8=
+github.com/urunimi/gorest v0.0.0-20190603061741-a352d3bc3467 h1:SXW7oGw1d/X72k/99nMC3UMvfZUipRVBufr/H69O6ao=
+github.com/urunimi/gorest v0.0.0-20190603061741-a352d3bc3467/go.mod h1:XzP1e0JAbHJE6xXsQXxHH17l2TvfC120F7j0qOUxIg8=
 github.com/valyala/bytebufferpool v1.0.0 h1:GqA5TC/0021Y/b9FG4Oi9Mr3q7XYx6KllzawFIhcdPw=
 github.com/valyala/bytebufferpool v1.0.0/go.mod h1:6bBcMArwyJ5K/AmCkWv1jt77kVWyCJ6HpOuEn7z0Csc=
 github.com/valyala/fasttemplate v0.0.0-20170224212429-dcecefd839c4 h1:gKMu1Bf6QINDnvyZuTaACm9ofY+PRh+5vFz4oxBZeF8=
