@@ -1,4 +1,4 @@
-module github.com/urunimi/go-web-core
+module github.com/urunimi/gorest
 
 go 1.12
 

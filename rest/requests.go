@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/urunimi/go-web-core/core"
+	"github.com/urunimi/gorest/core"
 )
 
 type Request struct {

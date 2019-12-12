@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"github.com/urunimi/go-web-core/core"
+	"github.com/urunimi/gorest/core"
 )
 
 type ServerTestSuite struct {

@@ -5,7 +5,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/getsentry/raven-go"
-	pluginLogrus "github.com/urunimi/go-web-core/plugin/logrus"
+	pluginLogrus "github.com/urunimi/gorest/plugin/logrus"
 )
 
 //Gets application _logger

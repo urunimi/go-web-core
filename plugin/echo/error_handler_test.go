@@ -8,8 +8,8 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/getsentry/raven-go"
-	"github.com/urunimi/go-web-core/core"
-	"github.com/urunimi/go-web-core/plugin/echo"
+	"github.com/urunimi/gorest/core"
+	"github.com/urunimi/gorest/plugin/echo"
 )
 
 func TestNewSentryErrorHandler(t *testing.T) {

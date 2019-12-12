@@ -14,7 +14,7 @@ import (
 	"github.com/go-playground/validator"
 	"github.com/labstack/echo"
 	"github.com/sirupsen/logrus"
-	pluginEcho "github.com/urunimi/go-web-core/plugin/echo"
+	pluginEcho "github.com/urunimi/gorest/plugin/echo"
 )
 
 // Server provides methods for controlling server's lifecycle
